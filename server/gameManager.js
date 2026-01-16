@@ -12,6 +12,7 @@ class GameManager {
         this.gameLength = 0; // Not used yet, maybe purely level based
         this.level = 1;
         this.maxLevels = 3;
+        this.activeLevel = 0; // Track current active level context
 
         // Config
         this.waitingTime = 60; // seconds to start after first ready? Or just 1 minute countdown
@@ -59,7 +60,7 @@ class GameManager {
     }
 
     startLobbyCountdown() {
-        let timeLeft = 60; // 1 minute
+        let timeLeft = 10; // 1 minute
         this.io.emit('lobby_timer_start', timeLeft);
 
         this.lobbyTimer = setInterval(() => {
@@ -75,36 +76,35 @@ class GameManager {
     }
 
     generateQuestions() {
-        // Generate simple questions for now
-        // Level 1: 3 questions
-        // Level 2: 3 questions
-        // Level 3: 3 questions
-        // Total 9 questions for quick game
-
         const qs = [];
 
-        // Helper to get random item
-        const rand = (arr) => arr[Math.floor(Math.random() * arr.length)];
-        const randKey = (obj) => {
-            const keys = Object.keys(obj);
-            return keys[Math.floor(Math.random() * keys.length)];
+        // Helper to shuffle array
+        const shuffle = (array) => {
+            let currentIndex = array.length, randomIndex;
+            while (currentIndex != 0) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+            }
+            return array;
         };
 
-
-        // Level 1: Find Region
-        for (let i = 0; i < 3; i++) {
-            const target = rand(regions);
+        // Level 1: Find Region (10 questions unique)
+        const allRegions = shuffle([...regions]); // Clone then shuffle
+        const selectedRegions = allRegions.slice(0, 10);
+        for (const target of selectedRegions) {
             qs.push({
                 level: 1,
                 text: `Dove si trova la regione **${target}**?`,
                 target: target,
-                attempts: {} // socketId -> count
+                attempts: {}
             });
         }
 
-        // Level 2: Region of Capital
-        for (let i = 0; i < 3; i++) {
-            const capital = randKey(capitals);
+        // Level 2: Region of Capital (10 questions unique)
+        const allCapitals = shuffle(Object.keys(capitals));
+        const selectedCapitals = allCapitals.slice(0, 10);
+        for (const capital of selectedCapitals) {
             const region = capitals[capital];
             qs.push({
                 level: 2,
@@ -114,9 +114,12 @@ class GameManager {
             });
         }
 
-        // Level 3: Region of Province
-        for (let i = 0; i < 3; i++) {
-            const prov = randKey(provinces);
+        // Level 3: Region of Province (10 unique questions)
+        // We have more than 20 provinces now, so we take 10 unique random ones
+        const allProvinces = shuffle(Object.keys(provinces));
+        const selectedProvinces = allProvinces.slice(0, 10); // Take first 10 after shuffle
+
+        for (const prov of selectedProvinces) {
             const region = provinces[prov];
             qs.push({
                 level: 3,
@@ -169,11 +172,23 @@ class GameManager {
         q.startTime = Date.now();
         q.solvedBy = []; // list of socketIds who solved it
 
+        let levelRules = null;
+        if (q.level > this.activeLevel) {
+            this.activeLevel = q.level;
+            const rules = {
+                1: "Adesso devi trovare la regione indicata sulla mappa!",
+                2: "Adesso devi indovinare in quale regione si trova il capoluogo indicato!",
+                3: "Adesso devi indovinare in quale regione si trova la provincia indicata!"
+            };
+            levelRules = rules[q.level] || `Livello ${q.level}`;
+        }
+
         this.io.emit('new_question', {
             index: this.currentQuestionIndex + 1,
             total: this.questions.length,
             text: q.text,
-            level: q.level
+            level: q.level,
+            levelRules: levelRules
         });
     }
 
@@ -233,14 +248,27 @@ class GameManager {
 
             player.score += points;
 
-            this.io.to(socketId).emit('answer_result', { correct: true, score: player.score, pointsAdded: points });
-            this.io.emit('plater_update', { id: socketId, score: player.score });
+            this.io.to(socketId).emit('answer_result', {
+                correct: true,
+                score: player.score,
+                pointsAdded: points,
+                correctAnswer: q.target,
+                attemptsLeft: 3 - attemptNum, // Should generally be > 0 here
+                done: true
+            });
+            this.io.emit('player_update', { id: socketId, score: player.score });
 
             this.checkQuestionEnd();
         } else {
             // Wrong
-            this.io.to(socketId).emit('answer_result', { correct: false, attemptsLeft: 3 - attemptNum });
-            if (attemptNum >= 3) {
+            const done = attemptNum >= 3;
+            this.io.to(socketId).emit('answer_result', {
+                correct: false,
+                attemptsLeft: 3 - attemptNum,
+                correctAnswer: done ? q.target : null,
+                done: done
+            });
+            if (done) {
                 this.checkQuestionEnd();
             }
         }
@@ -275,6 +303,7 @@ class GameManager {
         this.status = 'lobby';
         this.players = {};
         this.questions = [];
+        this.activeLevel = 0; // Reset active level
         if (this.lobbyTimer) clearInterval(this.lobbyTimer);
         this.lobbyTimer = null;
         this.io.emit('reset');

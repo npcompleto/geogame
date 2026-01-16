@@ -1,6 +1,6 @@
 const regions = [
-  "Abruzzo", "Basilicata", "Calabria", "Campania", "Emilia-Romagna", "Friuli-Venezia Giulia", 
-  "Lazio", "Liguria", "Lombardia", "Marche", "Molise", "Piemonte", "Puglia", "Sardegna", 
+  "Abruzzo", "Basilicata", "Calabria", "Campania", "Emilia-Romagna", "Friuli-Venezia Giulia",
+  "Lazio", "Liguria", "Lombardia", "Marche", "Molise", "Piemonte", "Puglia", "Sardegna",
   "Sicilia", "Toscana", "Trentino-Alto Adige", "Umbria", "Valle d'Aosta", "Veneto"
 ];
 
@@ -31,26 +31,25 @@ const capitals = {
 
 // Level 3 questions: Finding region by Province (Provincia) - Sample subset
 const provinces = {
-  "Pescara": "Abruzzo",
+  "Pescara": "Abruzzo", "Chieti": "Abruzzo", "Teramo": "Abruzzo",
   "Matera": "Basilicata",
-  "Cosenza": "Calabria",
-  "Salerno": "Campania",
-  "Parma": "Emilia-Romagna",
-  "Udine": "Friuli-Venezia Giulia",
-  "Viterbo": "Lazio",
-  "Savona": "Liguria",
-  "Bergamo": "Lombardia",
-  "Pesaro e Urbino": "Marche",
+  "Cosenza": "Calabria", "Crotone": "Calabria", "Reggio Calabria": "Calabria",
+  "Salerno": "Campania", "Caserta": "Campania", "Avellino": "Campania", "Benevento": "Campania",
+  "Parma": "Emilia-Romagna", "Modena": "Emilia-Romagna", "Ferrara": "Emilia-Romagna", "Rimini": "Emilia-Romagna",
+  "Udine": "Friuli-Venezia Giulia", "Pordenone": "Friuli-Venezia Giulia", "Gorizia": "Friuli-Venezia Giulia",
+  "Viterbo": "Lazio", "Latina": "Lazio", "Frosinone": "Lazio", "Rieti": "Lazio",
+  "Savona": "Liguria", "La Spezia": "Liguria", "Imperia": "Liguria",
+  "Bergamo": "Lombardia", "Brescia": "Lombardia", "Como": "Lombardia", "Varese": "Lombardia", "Monza e della Brianza": "Lombardia",
+  "Pesaro e Urbino": "Marche", "Macerata": "Marche",
   "Isernia": "Molise",
-  "Alessandria": "Piemonte",
-  "Lecce": "Puglia",
-  "Sassari": "Sardegna",
-  "Catania": "Sicilia",
-  "Pisa": "Toscana",
+  "Alessandria": "Piemonte", "Cuneo": "Piemonte", "Novara": "Piemonte", "Asti": "Piemonte",
+  "Lecce": "Puglia", "Foggia": "Puglia", "Taranto": "Puglia", "Brindisi": "Puglia",
+  "Sassari": "Sardegna", "Nuoro": "Sardegna", "Oristano": "Sardegna",
+  "Catania": "Sicilia", "Messina": "Sicilia", "Siracusa": "Sicilia", "Trapani": "Sicilia", "Agrigento": "Sicilia",
+  "Pisa": "Toscana", "Siena": "Toscana", "Lucca": "Toscana", "Livorno": "Toscana", "Arezzo": "Toscana",
   "Bolzano": "Trentino-Alto Adige",
   "Terni": "Umbria",
-  // Valle d'Aosta has no provinces, it's a single unit roughly
-  "Verona": "Veneto"
+  "Verona": "Veneto", "Padova": "Veneto", "Vicenza": "Veneto", "Treviso": "Veneto"
 };
 
 module.exports = { regions, capitals, provinces };

@@ -7,14 +7,27 @@ export default function GameInterface({ socket, gameState, myId }) {
 
     // Feedback state
     const [feedback, setFeedback] = useState(null); // { type: 'correct' | 'wrong', msg: string, delta: number }
+    const [finalResult, setFinalResult] = useState(null); // { correctAnswer: string, correct: boolean }
+
+    useEffect(() => {
+        // Reset per question
+        setFinalResult(null);
+    }, [currentQuestion]);
 
     useEffect(() => {
         function onAnswerResult(data) {
-            // data: { correct, score, pointsAdded, attemptsLeft }
+            // data: { correct, score, pointsAdded, attemptsLeft, correctAnswer, done }
             if (data.correct) {
                 setFeedback({ type: 'correct', msg: `Corretto! +${data.pointsAdded} pt`, delta: data.pointsAdded });
             } else {
                 setFeedback({ type: 'wrong', msg: `Sbagliato! Tentativi rimasti: ${data.attemptsLeft}`, delta: 0 });
+            }
+
+            if (data.done) {
+                setFinalResult({
+                    correctAnswer: data.correctAnswer,
+                    correct: data.correct
+                });
             }
 
             // Clear feedback after 2s
@@ -40,13 +53,24 @@ export default function GameInterface({ socket, gameState, myId }) {
 
     const handleRegionClick = (name) => {
         if (!currentQuestion) return;
+        if (finalResult) return; // Already done
         //console.log("Clicked:", name); 
-        // We might need to map map-names to server-names if they differ.
-        // Assuming perfect match or close enough.
         socket.emit('answer', name);
     };
 
+    // Level Rules Overlay
+    const [levelRules, setLevelRules] = useState(null);
+    useEffect(() => {
+        if (currentQuestion && currentQuestion.levelRules) {
+            setLevelRules(currentQuestion.levelRules);
+            const timer = setTimeout(() => setLevelRules(null), 4000); // Show for 4 seconds
+            return () => clearTimeout(timer);
+        }
+    }, [currentQuestion]);
+
     if (!currentQuestion) return <div className="glass-panel">Caricamento domanda...</div>;
+
+    const showLabels = currentQuestion.level > 1;
 
     return (
         <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column' }}>
@@ -70,7 +94,7 @@ export default function GameInterface({ socket, gameState, myId }) {
 
             {/* Map Area */}
             <div style={{ flex: 1, position: 'relative' }}>
-                <Map onRegionClick={handleRegionClick} />
+                <Map onRegionClick={handleRegionClick} showLabels={showLabels} />
 
                 {/* Overlay Feedback */}
                 {feedback && (
@@ -89,17 +113,64 @@ export default function GameInterface({ socket, gameState, myId }) {
                         {feedback.msg}
                     </div>
                 )}
+
+                {/* Level Rules Overlay */}
+                {levelRules && (
+                    <div className="glass-panel fade-in" style={{
+                        position: 'absolute',
+                        top: '0', left: '0',
+                        width: '100%', height: '100%',
+                        background: 'rgba(0, 0, 0, 0.85)',
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        flexDirection: 'column',
+                        zIndex: 200, // Higher than everything
+                        pointerEvents: 'none' // Let clicks pass through if user knows what to do? Maybe better to block slightly or just overlay
+                    }}>
+                        <h1 style={{ fontSize: '3rem', textAlign: 'center', color: '#60a5fa', marginBottom: '1rem' }}>
+                            Livello {currentQuestion.level}
+                        </h1>
+                        <h2 style={{ fontSize: '2rem', textAlign: 'center', color: 'white', maxWidth: '80%' }}>
+                            {levelRules}
+                        </h2>
+                    </div>
+                )}
             </div>
 
+            {/* Result Table (if done) */}
+            {finalResult && (
+                <div className="glass-panel fade-in" style={{
+                    margin: '0 1rem 1rem 1rem',
+                    textAlign: 'center',
+                    backgroundColor: finalResult.correct ? 'rgba(20, 83, 45, 0.8)' : 'rgba(127, 29, 29, 0.8)'
+                }}>
+                    <table style={{ width: '100%', color: 'white' }}>
+                        <tbody>
+                            <tr>
+                                <td style={{ padding: '0.5rem', fontWeight: 'bold' }}>Risultato:</td>
+                                <td style={{ padding: '0.5rem' }}>{finalResult.correct ? 'RISPOSTA ESATTA' : 'RISPOSTA SBAGLIATA'}</td>
+                            </tr>
+                            <tr>
+                                <td style={{ padding: '0.5rem', fontWeight: 'bold' }}>Risposta Corretta:</td>
+                                <td style={{ padding: '0.5rem', fontSize: '1.2rem', fontWeight: "bold" }}>{finalResult.correctAnswer}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            )}
+
             {/* Question Footer */}
-            <div className="glass-panel" style={{
-                margin: '1rem',
-                textAlign: 'center',
-                background: 'linear-gradient(to right, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.9))',
-                zIndex: 10
-            }}>
-                <h2 style={{ margin: 0 }} dangerouslySetInnerHTML={{ __html: currentQuestion.text }}></h2>
-            </div>
+            {!finalResult && (
+                <div className="glass-panel" style={{
+                    margin: '1rem',
+                    textAlign: 'center',
+                    background: 'linear-gradient(to right, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.9))',
+                    zIndex: 10
+                }}>
+                    <h2 style={{ margin: 0 }} dangerouslySetInnerHTML={{ __html: currentQuestion.text }}></h2>
+                </div>
+            )}
 
             {/* Leaderboard Sidebar (Optional, maybe small overlay) */}
             <div style={{
