@@ -173,6 +173,7 @@ export default function GameInterface({ socket, gameState, myId }) {
             )}
 
             {/* Leaderboard Sidebar (Optional, maybe small overlay) */}
+            {/*
             <div style={{
                 position: 'absolute',
                 right: '1rem',
@@ -192,6 +193,7 @@ export default function GameInterface({ socket, gameState, myId }) {
                         </div>
                     ))}
             </div>
+            */}
         </div>
     );
 }
