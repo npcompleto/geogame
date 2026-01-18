@@ -1,8 +1,9 @@
 const { regions, capitals, provinces } = require('./data');
 
 class GameManager {
-    constructor(io) {
+    constructor(io, roomId) {
         this.io = io;
+        this.roomId = roomId;
         this.players = {}; // socketId -> { name, score, ready, joinedAt }
         this.status = 'lobby'; // lobby, playing, ended
         this.questions = [];
@@ -20,8 +21,9 @@ class GameManager {
     }
 
     addPlayer(socket, name) {
+        // If game is playing, don't let them join as player, but send them the state to view leaderboard
         if (this.status !== 'lobby') {
-            socket.emit('error', 'Game in progress');
+            socket.emit('game_in_progress', { players: this.players });
             return false;
         }
         this.players[socket.id] = {
@@ -36,6 +38,8 @@ class GameManager {
 
     removePlayer(socketId) {
         delete this.players[socketId];
+        // If empty, game wrapper in index.js should handle cleanup of the manager itself optionally
+        // But here we just broadcast update
         if (Object.keys(this.players).length === 0) {
             this.resetGame();
         } else {
@@ -61,12 +65,12 @@ class GameManager {
 
     startLobbyCountdown() {
         let timeLeft = 10; // 1 minute
-        this.io.emit('lobby_timer_start', timeLeft);
+        this.io.to(this.roomId).emit('lobby_timer_start', timeLeft);
 
         this.lobbyTimer = setInterval(() => {
             timeLeft--;
             if (timeLeft > 0) {
-                this.io.emit('lobby_timer_tick', timeLeft);
+                this.io.to(this.roomId).emit('lobby_timer_tick', timeLeft);
             } else {
                 clearInterval(this.lobbyTimer);
                 this.lobbyTimer = null;
@@ -157,7 +161,7 @@ class GameManager {
         this.questions = this.generateQuestions();
         this.currentQuestionIndex = 0;
 
-        this.io.emit('game_start', { players: this.players });
+        this.io.to(this.roomId).emit('game_start', { players: this.players });
         this.askQuestion();
     }
 
@@ -183,7 +187,7 @@ class GameManager {
             levelRules = rules[q.level] || `Livello ${q.level}`;
         }
 
-        this.io.emit('new_question', {
+        this.io.to(this.roomId).emit('new_question', {
             index: this.currentQuestionIndex + 1,
             total: this.questions.length,
             text: q.text,
@@ -198,28 +202,6 @@ class GameManager {
         const q = this.questions[this.currentQuestionIndex];
         const player = this.players[socketId];
         if (!player) return;
-
-        // Check if player already solved it?
-        // "Il giocatore che indovina avrà X punti..."
-        // "Dopo 3 tentativi si passa alla domanda successiva" -> This implies attempts are per player or global?
-        // "Il sistema dovrà proporre dei nomi... e gli utenti dovranno trovarli"
-
-        // Usually multiplayer geo games: everyone tries to answer the SAME question.
-        // DOES EVERYONE need to answer? Or does the question end when someone answers?
-        // "Il giocatore più veloce ottiene 3 punti in più" -> implies multiple people can answer.
-        // "Dopo 3 tentativi si passa alla domanda successiva" -> This is ambiguous. 
-        // Is it 3 attempts per player? Or 3 attempts TOTAL for the group?
-        // Giving the competitive nature, usually everyone plays parallely.
-        // Let's assume: Everyone has to answer. When everyone answers OR timeout? 
-        // Or maybe "3 tentativi" refers to the player's personal lives for that question.
-
-        // INTERPRETATION:
-        // GLOBAL FLOW: Question is shown.
-        // EACH PLAYER: Tries to click region.
-        // IF CORRECT: Gets points (3, 2, 1 based on attempt). Max 3 attempts.
-        // IF FASTEST (Global): +3 bonus points.
-        // WHEN DO WE MOVE ON? When everyone finished or max time?
-        // Let's add a max time per question e.g. 10-15 seconds or when everyone is done.
 
         if (q.solvedBy.includes(socketId)) return; // Already answered correctly
 
@@ -243,7 +225,7 @@ class GameManager {
             // Speed bonus
             if (q.solvedBy.length === 1) {
                 points += 3; // First one!
-                this.io.emit('player_message', { id: socketId, msg: 'Fastest!' });
+                this.io.to(this.roomId).emit('player_message', { id: socketId, msg: 'Fastest!' });
             }
 
             player.score += points;
@@ -256,7 +238,7 @@ class GameManager {
                 attemptsLeft: 3 - attemptNum, // Should generally be > 0 here
                 done: true
             });
-            this.io.emit('player_update', { id: socketId, score: player.score });
+            this.io.to(this.roomId).emit('player_update', { id: socketId, score: player.score });
 
             this.checkQuestionEnd();
         } else {
@@ -294,7 +276,7 @@ class GameManager {
 
     endGame() {
         this.status = 'ended';
-        this.io.emit('game_over', { players: this.players });
+        this.io.to(this.roomId).emit('game_over', { players: this.players });
         // Reset after some time?
         setTimeout(() => this.resetGame(), 10000);
     }
@@ -306,11 +288,11 @@ class GameManager {
         this.activeLevel = 0; // Reset active level
         if (this.lobbyTimer) clearInterval(this.lobbyTimer);
         this.lobbyTimer = null;
-        this.io.emit('reset');
+        this.io.to(this.roomId).emit('reset');
     }
 
     broadcastLobbyState() {
-        this.io.emit('lobby_state', { players: this.players });
+        this.io.to(this.roomId).emit('lobby_state', { players: this.players });
     }
 }
 

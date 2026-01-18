@@ -70,6 +70,10 @@ function App() {
       setPlayerState(prev => ({ ...prev, joined: false, ready: false, score: 0 }));
     }
 
+    function onGameInProgress(data) {
+      setGameState(prev => ({ ...prev, status: 'inprogress_view', players: data.players }));
+    }
+
     socket.on('connect', onConnect);
     socket.on('disconnect', onDisconnect);
     socket.on('lobby_state', onLobbyState);
@@ -78,6 +82,7 @@ function App() {
     socket.on('player_update', onPlayerUpdate);
     socket.on('game_over', onGameOver);
     socket.on('reset', onReset);
+    socket.on('game_in_progress', onGameInProgress);
 
     // Timer events handled in components usually, or globally? 
     // We can listen here or pass socket down.
@@ -91,6 +96,7 @@ function App() {
       socket.off('player_update', onPlayerUpdate);
       socket.off('game_over', onGameOver);
       socket.off('reset', onReset);
+      socket.off('game_in_progress', onGameInProgress);
       socket.disconnect();
     };
   }, []);
@@ -100,8 +106,8 @@ function App() {
       {!isConnected && <div className="glass-panel">Connecting to server...</div>}
 
       {isConnected && !playerState.joined && (
-        <Login onJoin={(name) => {
-          socket.emit('join_game', name);
+        <Login onJoin={(name, gameId) => {
+          socket.emit('join_game', { name, gameId });
           setPlayerState(prev => ({ ...prev, name, joined: true }));
         }} />
       )}
@@ -125,24 +131,32 @@ function App() {
       {isConnected && gameState.status === 'ended' && (
         <GameOver players={gameState.players} myId={playerState.id} />
       )}
+
+      {isConnected && gameState.status === 'inprogress_view' && (
+        <GameInProgress players={gameState.players} />
+      )}
     </div>
   );
 }
 
 function Login({ onJoin }) {
   const [name, setName] = useState('');
+  // Get gameId from URL or default
+  const gameId = window.location.pathname.substring(1) || 'DEFAULT';
+
   return (
     <div className="glass-panel fade-in" style={{ textAlign: 'center' }}>
       <h1>Benvenuto a GeoBattle IT</h1>
+      <p>Partita: <strong>{gameId}</strong></p>
       <p>Inserisci il tuo nome per iniziare</p>
       <input
         className="input-field"
         value={name}
         onChange={e => setName(e.target.value)}
         placeholder="Il tuo nome"
-        onKeyDown={e => e.key === 'Enter' && name && onJoin(name)}
+        onKeyDown={e => e.key === 'Enter' && name && onJoin(name, gameId)}
       />
-      <button className="btn" disabled={!name} onClick={() => onJoin(name)}>
+      <button className="btn" disabled={!name} onClick={() => onJoin(name, gameId)}>
         Entra nella Lobby
       </button>
     </div>
@@ -171,6 +185,30 @@ function GameOver({ players, myId }) {
       </div>
 
       <p style={{ marginTop: '2rem', opacity: 0.7 }}>In attesa di reset del server...</p>
+    </div>
+  );
+}
+
+function GameInProgress({ players }) {
+  const sorted = Object.values(players).sort((a, b) => b.score - a.score);
+
+  return (
+    <div className="glass-panel fade-in" style={{ textAlign: 'center', minWidth: '400px' }}>
+      <h1>La partita è attualmente in corso</h1>
+
+      <div style={{ marginTop: '2rem', textAlign: 'left' }}>
+        <h3>Classifica Attuale</h3>
+        <ul style={{ listStyle: 'none', padding: 0 }}>
+          {sorted.map((p, i) => (
+            <li key={p.id} style={{ padding: '0.5rem', borderBottom: '1px solid rgba(255,255,255,0.1)', display: 'flex', justifyContent: 'space-between', color: 'white' }}>
+              <span>{i + 1}. {p.name}</span>
+              <span>{p.score}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <p style={{ marginTop: '2rem', opacity: 0.7 }}>Attendi il termine della partita per unirti alla prossima.</p>
     </div>
   );
 }
