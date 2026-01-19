@@ -5,8 +5,52 @@ const { Server } = require('socket.io');
 const cors = require('cors');
 const GameManager = require('./gameManager');
 
+const fs = require('fs');
+const path = require('path');
+
 const app = express();
 app.use(cors());
+
+// Leaderboard Management
+const LEADERBOARD_FILE = path.join(__dirname, 'leaderboard.json');
+let globalLeaderboard = [];
+
+// Load leaderboard
+try {
+    if (fs.existsSync(LEADERBOARD_FILE)) {
+        globalLeaderboard = JSON.parse(fs.readFileSync(LEADERBOARD_FILE, 'utf8'));
+    }
+} catch (e) {
+    console.error("Failed to load leaderboard", e);
+}
+
+function getLeaderboard() {
+    return globalLeaderboard;
+}
+
+function updateLeaderboard(gamePlayers) {
+    const playersArr = Object.values(gamePlayers);
+    for (const p of playersArr) {
+        globalLeaderboard.push({
+            name: p.name,
+            score: p.score,
+            date: new Date().toISOString()
+        });
+    }
+
+    // Sort and keep top 20
+    globalLeaderboard.sort((a, b) => b.score - a.score);
+    globalLeaderboard = globalLeaderboard.slice(0, 20);
+
+    // Save
+    try {
+        fs.writeFileSync(LEADERBOARD_FILE, JSON.stringify(globalLeaderboard, null, 2));
+    } catch (e) {
+        console.error("Failed to save leaderboard", e);
+    }
+}
+
+const globalMethods = { getLeaderboard, updateLeaderboard };
 
 const server = http.createServer(app);
 const io = new Server(server, {
@@ -31,7 +75,7 @@ io.on('connection', (socket) => {
 
         if (!games[room]) {
             console.log(`Creating new game room: ${room}`);
-            games[room] = new GameManager(io, room);
+            games[room] = new GameManager(io, room, globalMethods);
         }
 
         const game = games[room];

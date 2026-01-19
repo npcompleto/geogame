@@ -17,7 +17,8 @@ function App() {
     status: 'lobby', // lobby, playing, ended
     players: {},
     currentQuestion: null,
-    winner: null
+    winner: null,
+    globalLeaderboard: []
   });
 
   useEffect(() => {
@@ -33,7 +34,11 @@ function App() {
     }
 
     function onLobbyState(data) {
-      setGameState(prev => ({ ...prev, players: data.players }));
+      setGameState(prev => ({
+        ...prev,
+        players: data.players,
+        globalLeaderboard: data.globalLeaderboard || []
+      }));
     }
 
     function onGameStart(data) {
@@ -57,16 +62,22 @@ function App() {
     }
 
     function onGameOver(data) {
-      setGameState(prev => ({ ...prev, status: 'ended', players: data.players }));
+      setGameState(prev => ({
+        ...prev,
+        status: 'ended',
+        players: data.players,
+        globalLeaderboard: data.globalLeaderboard || []
+      }));
     }
 
     function onReset() {
-      setGameState({
+      setGameState(prev => ({ // keep global leaderboard if we had it
+        ...prev,
         status: 'lobby',
         players: {},
         currentQuestion: null,
         winner: null
-      });
+      }));
       setPlayerState(prev => ({ ...prev, joined: false, ready: false, score: 0 }));
     }
 
@@ -121,6 +132,7 @@ function App() {
             socket.emit('set_ready');
             setPlayerState(prev => ({ ...prev, ready: true }));
           }}
+          globalLeaderboard={gameState.globalLeaderboard}
         />
       )}
 
@@ -129,7 +141,11 @@ function App() {
       )}
 
       {isConnected && gameState.status === 'ended' && (
-        <GameOver players={gameState.players} myId={playerState.id} />
+        <GameOver
+          players={gameState.players}
+          myId={playerState.id}
+          globalLeaderboard={gameState.globalLeaderboard}
+        />
       )}
 
       {isConnected && gameState.status === 'inprogress_view' && (
@@ -163,7 +179,7 @@ function Login({ onJoin }) {
   );
 }
 
-function GameOver({ players, myId }) {
+function GameOver({ players, myId, globalLeaderboard = [] }) {
   const sorted = Object.values(players).sort((a, b) => b.score - a.score);
   const winner = sorted[0];
 
@@ -183,6 +199,26 @@ function GameOver({ players, myId }) {
           ))}
         </ul>
       </div>
+
+      {/* Global Leaderboard Section */}
+      {globalLeaderboard && globalLeaderboard.length > 0 && (
+        <div style={{ marginTop: '2rem', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '1rem' }}>
+          <h3 style={{ textAlign: 'center', marginBottom: '1rem' }}>Classifica Globale (Top 20)</h3>
+          <div style={{ maxHeight: '200px', overflowY: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
+              <tbody>
+                {globalLeaderboard.map((p, i) => (
+                  <tr key={i} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                    <td style={{ padding: '0.5rem' }}>{i + 1}.</td>
+                    <td style={{ padding: '0.5rem', fontWeight: 'bold', textAlign: 'left' }}>{p.name}</td>
+                    <td style={{ padding: '0.5rem', textAlign: 'right' }}>{p.score} pt</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
 
       <p className="gameover-wait-text">In attesa di reset del server...</p>
     </div>

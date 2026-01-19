@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './Lobby.css';
 
-export default function Lobby({ socket, players, isReady, onSetReady }) {
+export default function Lobby({ socket, players, isReady, onSetReady, globalLeaderboard = [] }) {
     const [timeLeft, setTimeLeft] = useState(null);
 
     useEffect(() => {
@@ -52,6 +52,26 @@ export default function Lobby({ socket, players, isReady, onSetReady }) {
                     <p className="lobby-waiting-text">In attesa di altri giocatori...</p>
                 )}
             </div>
+
+            {/* Global Leaderboard Section */}
+            {globalLeaderboard && globalLeaderboard.length > 0 && (
+                <div style={{ marginTop: '2rem', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '1rem' }}>
+                    <h3 style={{ textAlign: 'center', marginBottom: '1rem' }}>Classifica Globale (Top 20)</h3>
+                    <div style={{ maxHeight: '200px', overflowY: 'auto' }}>
+                        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
+                            <tbody>
+                                {globalLeaderboard.map((p, i) => (
+                                    <tr key={i} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                                        <td style={{ padding: '0.5rem' }}>{i + 1}.</td>
+                                        <td style={{ padding: '0.5rem', fontWeight: 'bold' }}>{p.name}</td>
+                                        <td style={{ padding: '0.5rem', textAlign: 'right' }}>{p.score} pt</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            )}
 
             <div className="lobby-footer">
                 <p>Regole: Indovina la regione entro il tempo limite. Più veloce sei, più punti fai!</p>

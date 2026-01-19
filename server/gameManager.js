@@ -1,7 +1,7 @@
-const { regions, capitals, provinces } = require('./data');
+const { regions, capitals, provinces, comuni } = require('./data');
 
 class GameManager {
-    constructor(io, roomId) {
+    constructor(io, roomId, globalMethods = {}) {
         this.io = io;
         this.roomId = roomId;
         this.players = {}; // socketId -> { name, score, ready, joinedAt }
@@ -12,13 +12,21 @@ class GameManager {
         this.startTime = null;
         this.gameLength = 0; // Not used yet, maybe purely level based
         this.level = 1;
-        this.maxLevels = 3;
+        this.maxLevels = 4;
         this.activeLevel = 0; // Track current active level context
+
+        // Global methods (leaderboard)
+        this.globalMethods = globalMethods;
 
         // Config
         this.waitingTime = 60; // seconds to start after first ready? Or just 1 minute countdown
         this.lobbyTimer = null;
     }
+
+    // ... methods ...
+
+    // ... methods ...
+
 
     addPlayer(socket, name) {
         // If game is playing, don't let them join as player, but send them the state to view leaderboard
@@ -93,9 +101,9 @@ class GameManager {
             return array;
         };
 
-        // Level 1: Find Region (10 questions unique)
+        // Level 1: Find Region (6 questions unique)
         const allRegions = shuffle([...regions]); // Clone then shuffle
-        const selectedRegions = allRegions.slice(0, 10);
+        const selectedRegions = allRegions.slice(0, 6);
         for (const target of selectedRegions) {
             qs.push({
                 level: 1,
@@ -105,9 +113,9 @@ class GameManager {
             });
         }
 
-        // Level 2: Region of Capital (10 questions unique)
+        // Level 2: Region of Capital (6 questions unique)
         const allCapitals = shuffle(Object.keys(capitals));
-        const selectedCapitals = allCapitals.slice(0, 10);
+        const selectedCapitals = allCapitals.slice(0, 6);
         for (const capital of selectedCapitals) {
             const region = capitals[capital];
             qs.push({
@@ -118,10 +126,9 @@ class GameManager {
             });
         }
 
-        // Level 3: Region of Province (10 unique questions)
-        // We have more than 20 provinces now, so we take 10 unique random ones
+        // Level 3: Region of Province (6 unique questions)
         const allProvinces = shuffle(Object.keys(provinces));
-        const selectedProvinces = allProvinces.slice(0, 10); // Take first 10 after shuffle
+        const selectedProvinces = allProvinces.slice(0, 6);
 
         for (const prov of selectedProvinces) {
             const region = provinces[prov];
@@ -131,6 +138,23 @@ class GameManager {
                 target: region,
                 attempts: {}
             });
+        }
+
+        // Level 4: Region of Comune (6 unique questions)
+        // Ensure we have 'comuni' loaded (it might be undefined if not in data.js yet, but we added it)
+        if (comuni) {
+            const allComuni = shuffle(Object.keys(comuni));
+            const selectedComuni = allComuni.slice(0, 6);
+
+            for (const com of selectedComuni) {
+                const region = comuni[com];
+                qs.push({
+                    level: 4,
+                    text: `In quale regione si trova il comune di "${com}"?`,
+                    target: region,
+                    attempts: {}
+                });
+            }
         }
 
         return qs;
@@ -182,7 +206,8 @@ class GameManager {
             const rules = {
                 1: "Adesso devi trovare la regione indicata sulla mappa!",
                 2: "Adesso devi indovinare in quale regione si trova il capoluogo indicato!",
-                3: "Adesso devi indovinare in quale regione si trova la provincia indicata!"
+                3: "Adesso devi indovinare in quale regione si trova la provincia indicata!",
+                4: "Adesso devi indovinare in quale regione si trova il comune indicato!"
             };
             levelRules = rules[q.level] || `Livello ${q.level}`;
         }
@@ -222,11 +247,22 @@ class GameManager {
             else if (attemptNum === 2) points = 2;
             else if (attemptNum === 3) points = 1;
 
-            // Speed bonus
+            // Speed bonus (First player)
             if (q.solvedBy.length === 1) {
                 points += 3; // First one!
                 this.io.to(this.roomId).emit('player_message', { id: socketId, msg: 'Fastest!' });
             }
+
+            // Time Bonus
+            // Calculate time taken in seconds
+            const timeTaken = (Date.now() - q.startTime) / 1000;
+            let timeBonus = 0;
+            if (timeTaken < 5) {
+                timeBonus = 2;
+            } else if (timeTaken < 10) {
+                timeBonus = 1;
+            }
+            points += timeBonus;
 
             player.score += points;
 
@@ -234,6 +270,7 @@ class GameManager {
                 correct: true,
                 score: player.score,
                 pointsAdded: points,
+                timeBonus: timeBonus,
                 correctAnswer: q.target,
                 attemptsLeft: 3 - attemptNum, // Should generally be > 0 here
                 done: true
@@ -276,7 +313,18 @@ class GameManager {
 
     endGame() {
         this.status = 'ended';
-        this.io.to(this.roomId).emit('game_over', { players: this.players });
+
+        // Update global leaderboard if callback exists
+        if (this.globalMethods && this.globalMethods.updateLeaderboard) {
+            this.globalMethods.updateLeaderboard(this.players);
+        }
+
+        const globalLeaderboard = this.globalMethods && this.globalMethods.getLeaderboard ? this.globalMethods.getLeaderboard() : [];
+
+        this.io.to(this.roomId).emit('game_over', {
+            players: this.players,
+            globalLeaderboard: globalLeaderboard
+        });
         // Reset after some time?
         setTimeout(() => this.resetGame(), 10000);
     }
@@ -292,7 +340,11 @@ class GameManager {
     }
 
     broadcastLobbyState() {
-        this.io.to(this.roomId).emit('lobby_state', { players: this.players });
+        const globalLeaderboard = this.globalMethods && this.globalMethods.getLeaderboard ? this.globalMethods.getLeaderboard() : [];
+        this.io.to(this.roomId).emit('lobby_state', {
+            players: this.players,
+            globalLeaderboard: globalLeaderboard
+        });
     }
 }
 

@@ -52,4 +52,28 @@ const provinces = {
   "Verona": "Veneto", "Padova": "Veneto", "Vicenza": "Veneto", "Treviso": "Veneto"
 };
 
-module.exports = { regions, capitals, provinces };
+// Level 4 questions: Finding region by Municipality (Comune) - Sample subset
+const comuni = {
+  "Vasto": "Abruzzo", "Sulmona": "Abruzzo",
+  "Melfi": "Basilicata", "Policoro": "Basilicata",
+  "Lamezia Terme": "Calabria", "Tropea": "Calabria",
+  "Sorrento": "Campania", "Amalfi": "Campania", "Pompei": "Campania",
+  "Riccione": "Emilia-Romagna", "Carpi": "Emilia-Romagna", "Imola": "Emilia-Romagna",
+  "Lignano Sabbiadoro": "Friuli-Venezia Giulia", "Monfalcone": "Friuli-Venezia Giulia",
+  "Civitavecchia": "Lazio", "Cassino": "Lazio", "Ostia": "Lazio",
+  "Sanremo": "Liguria", "Portofino": "Liguria", "Rapallo": "Liguria",
+  "Vigevano": "Lombardia", "Sesto San Giovanni": "Lombardia", "Crema": "Lombardia",
+  "Senigallia": "Marche", "Fabriano": "Marche",
+  "Termoli": "Molise", "Venafro": "Molise",
+  "Ivrea": "Piemonte", "Alba": "Piemonte", "Rivoli": "Piemonte",
+  "Gallipoli": "Puglia", "Ostuni": "Puglia", "Alberobello": "Puglia",
+  "Alghero": "Sardegna", "Olbia": "Sardegna", "Porto Cervo": "Sardegna",
+  "Taormina": "Sicilia", "Cefalù": "Sicilia", "Marsala": "Sicilia", "Modica": "Sicilia",
+  "Viareggio": "Toscana", "Cortona": "Toscana", "Piombino": "Toscana",
+  "Rovereto": "Trentino-Alto Adige", "Merano": "Trentino-Alto Adige",
+  "Assisi": "Umbria", "Gubbio": "Umbria", "Orvieto": "Umbria", "Spoleto": "Umbria",
+  "Courmayeur": "Valle d'Aosta",
+  "Chioggia": "Veneto", "Cortina d'Ampezzo": "Veneto", "Jesolo": "Veneto", "Bassano del Grappa": "Veneto"
+};
+
+module.exports = { regions, capitals, provinces, comuni };
