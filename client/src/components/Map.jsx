@@ -1,20 +1,21 @@
 import React, { memo } from "react";
 import { ComposableMap, Geographies, Geography, Marker } from "react-simple-maps";
 import { geoCentroid } from "d3-geo";
+import "./Map.css";
 
 // We import the local GeoJSON
 import italyGeo from "../italy-regions.json";
 
 const Map = ({ onRegionClick, showLabels }) => {
     return (
-        <div className="map-wrapper" style={{ width: "100%", height: "60vh", position: "relative" }}>
+        <div className="map-wrapper">
             <ComposableMap
                 projection="geoMercator"
                 projectionConfig={{
-                    scale: 2200,
+                    scale: 3500,
                     center: [12.5, 42] // Center roughly on Italy
                 }}
-                style={{ width: "100%", height: "100%" }}
+                className="map-composable"
             >
                 <Geographies geography={italyGeo}>
                     {({ geographies }) =>
@@ -29,36 +30,14 @@ const Map = ({ onRegionClick, showLabels }) => {
                                         onClick={() => {
                                             onRegionClick(regName);
                                         }}
-                                        className="region-path"
-                                        style={{
-                                            default: {
-                                                outline: "none"
-                                            },
-                                            hover: {
-                                                fill: "#475569",
-                                                outline: "none"
-                                            },
-                                            pressed: {
-                                                fill: "#2563eb",
-                                                outline: "none"
-                                            }
-                                        }}
+                                        className="region-path map-geography"
                                     />
                                     {showLabels && (
                                         <Marker coordinates={centroid}>
                                             <text
                                                 textAnchor="middle"
                                                 y={5}
-                                                style={{
-                                                    fontFamily: "system-ui",
-                                                    fill: "#ffffff", // Dark text normally, but map color?
-                                                    // Map default fill is usually strict unless CSS overrides. 
-                                                    // In index.css probably .region-path has fill.
-                                                    // Let's use white with shadow or similar.
-                                                    fontSize: "10px",
-                                                    pointerEvents: "none",
-                                                    textShadow: "1px 1px 2px black"
-                                                }}
+                                                className="map-label-text"
                                             >
                                                 {regName}
                                             </text>
@@ -75,3 +54,4 @@ const Map = ({ onRegionClick, showLabels }) => {
 };
 
 export default memo(Map);
+

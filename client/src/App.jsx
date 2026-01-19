@@ -145,7 +145,7 @@ function Login({ onJoin }) {
   const gameId = window.location.pathname.substring(1) || 'DEFAULT';
 
   return (
-    <div className="glass-panel fade-in" style={{ textAlign: 'center' }}>
+    <div className="glass-panel fade-in login-container">
       <h1>Benvenuto a GeoBattle IT</h1>
       <p>Partita: <strong>{gameId}</strong></p>
       <p>Inserisci il tuo nome per iniziare</p>
@@ -168,15 +168,15 @@ function GameOver({ players, myId }) {
   const winner = sorted[0];
 
   return (
-    <div className="glass-panel fade-in" style={{ textAlign: 'center', minWidth: '400px' }}>
+    <div className="glass-panel fade-in gameover-container">
       <h1>Partita Terminata!</h1>
       {winner && <h2>Vincitore: {winner.name} ({winner.score} pt)</h2>}
 
-      <div style={{ marginTop: '2rem', textAlign: 'left' }}>
+      <div className="gameover-leaderboard">
         <h3>Classifica Finale</h3>
-        <ul style={{ listStyle: 'none', padding: 0 }}>
+        <ul className="gameover-list">
           {sorted.map((p, i) => (
-            <li key={p.id} style={{ padding: '0.5rem', borderBottom: '1px solid rgba(255,255,255,0.1)', display: 'flex', justifyContent: 'space-between', color: p.id === myId ? '#3b82f6' : 'white', fontWeight: p.id === myId ? 'bold' : 'normal' }}>
+            <li key={p.id} className={`gameover-list-item ${p.id === myId ? 'is-me' : ''}`}>
               <span>{i + 1}. {p.name} {p.id === myId && '(Tu)'}</span>
               <span>{p.score}</span>
             </li>
@@ -184,7 +184,7 @@ function GameOver({ players, myId }) {
         </ul>
       </div>
 
-      <p style={{ marginTop: '2rem', opacity: 0.7 }}>In attesa di reset del server...</p>
+      <p className="gameover-wait-text">In attesa di reset del server...</p>
     </div>
   );
 }
@@ -193,14 +193,14 @@ function GameInProgress({ players }) {
   const sorted = Object.values(players).sort((a, b) => b.score - a.score);
 
   return (
-    <div className="glass-panel fade-in" style={{ textAlign: 'center', minWidth: '400px' }}>
+    <div className="glass-panel fade-in inprogress-container">
       <h1>La partita è attualmente in corso</h1>
 
-      <div style={{ marginTop: '2rem', textAlign: 'left' }}>
+      <div className="inprogress-leaderboard">
         <h3>Classifica Attuale</h3>
-        <ul style={{ listStyle: 'none', padding: 0 }}>
+        <ul className="inprogress-list">
           {sorted.map((p, i) => (
-            <li key={p.id} style={{ padding: '0.5rem', borderBottom: '1px solid rgba(255,255,255,0.1)', display: 'flex', justifyContent: 'space-between', color: 'white' }}>
+            <li key={p.id} className="inprogress-list-item">
               <span>{i + 1}. {p.name}</span>
               <span>{p.score}</span>
             </li>
@@ -208,9 +208,10 @@ function GameInProgress({ players }) {
         </ul>
       </div>
 
-      <p style={{ marginTop: '2rem', opacity: 0.7 }}>Attendi il termine della partita per unirti alla prossima.</p>
+      <p className="inprogress-wait-text">Attendi il termine della partita per unirti alla prossima.</p>
     </div>
   );
 }
 
 export default App;
+

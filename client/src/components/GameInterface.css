@@ -1,0 +1,205 @@
+.game-interface-container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.game-hud {
+    padding: 1rem;
+    margin: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 10;
+}
+
+.game-hud-left {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.game-level-indicator {
+    font-weight: bold;
+    font-size: 1.2rem;
+}
+
+.game-hud-center {
+    flex: 1;
+    text-align: center;
+}
+
+.game-hud-right {
+    font-weight: bold;
+    font-size: 1.2rem;
+    color: #f59e0b;
+}
+
+.game-map-area {
+    flex: 1;
+    position: relative;
+}
+
+.game-rank-badge {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 20;
+    padding: 0;
+    background: rgba(59, 130, 246, 0.6);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    text-align: center;
+    line-height: 1.2;
+}
+
+.game-rank-label {
+    font-size: 0.7rem;
+    opacity: 0.9;
+}
+
+.game-rank-value {
+    font-size: 2rem;
+    font-weight: bold;
+}
+
+.game-rank-sublabel {
+    font-size: 0.6rem;
+    opacity: 0.9;
+}
+
+.game-feedback-overlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    padding: 2rem 4rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    pointer-events: none;
+    min-width: 300px;
+}
+
+.game-feedback-overlay.correct {
+    background: rgba(22, 163, 74, 0.95);
+}
+
+.game-feedback-overlay.wrong {
+    background: rgba(220, 38, 38, 0.95);
+}
+
+.game-feedback-overlay.bonus {
+    background: rgba(245, 158, 11, 0.95);
+}
+
+.game-feedback-title {
+    font-size: 3rem;
+    margin: 0 0 0.5rem 0;
+    color: white;
+    text-transform: uppercase;
+    text-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    letter-spacing: 2px;
+    font-style: italic;
+}
+
+.game-feedback-score {
+    color: #fbbf24;
+    margin-bottom: 0.5rem;
+}
+
+.game-feedback-submsg {
+    font-size: 1.5rem;
+    color: rgba(255, 255, 255, 0.9);
+    font-weight: 600;
+}
+
+.game-rules-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    z-index: 200;
+    pointer-events: none;
+}
+
+.game-rules-title {
+    font-size: 3rem;
+    text-align: center;
+    color: #60a5fa;
+    margin-bottom: 1rem;
+}
+
+.game-rules-text {
+    font-size: 2rem;
+    text-align: center;
+    color: white;
+    max-width: 80%;
+}
+
+.game-result-panel {
+    margin: 0 1rem 1rem 1rem;
+    text-align: center;
+}
+
+.game-result-panel.correct {
+    background-color: rgba(20, 83, 45, 0.8);
+}
+
+.game-result-panel.wrong {
+    background-color: rgba(127, 29, 29, 0.8);
+}
+
+.game-result-table {
+    width: 100%;
+    color: white;
+}
+
+.game-result-cell-label {
+    padding: 0.5rem;
+    font-weight: bold;
+}
+
+.game-result-cell-value {
+    padding: 0.5rem;
+}
+
+.game-result-answer {
+    padding: 0.5rem;
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+.game-footer {
+    margin: 1rem;
+    text-align: center;
+    background: linear-gradient(to right, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.9));
+    z-index: 10;
+    position: fixed;
+    left: 50%;
+    transform: translate(-55%, 0);
+    bottom: 0;
+    height: 40px;
+    font-size: 0.7rem;
+    width: 80%;
+    padding: 1.5rem;
+}
+
+.game-footer-text-container {
+    margin: 0;
+}

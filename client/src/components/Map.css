@@ -1,0 +1,33 @@
+.map-wrapper {
+    width: 100%;
+    height: 60vh;
+    position: relative;
+}
+
+.map-composable {
+    width: 100%;
+    height: 100%;
+}
+
+.map-geography {
+    outline: none;
+}
+
+.map-geography:hover {
+    fill: #475569;
+    outline: none;
+}
+
+.map-geography:active,
+.map-geography:focus {
+    fill: #2563eb;
+    outline: none;
+}
+
+.map-label-text {
+    font-family: system-ui;
+    fill: #ffffff;
+    font-size: 10px;
+    pointer-events: none;
+    text-shadow: 1px 1px 2px black;
+}

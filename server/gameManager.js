@@ -99,7 +99,7 @@ class GameManager {
         for (const target of selectedRegions) {
             qs.push({
                 level: 1,
-                text: `Dove si trova la regione **${target}**?`,
+                text: `Dove si trova la regione "${target}"?`,
                 target: target,
                 attempts: {}
             });
@@ -112,7 +112,7 @@ class GameManager {
             const region = capitals[capital];
             qs.push({
                 level: 2,
-                text: `In quale regione si trova **${capital}**?`,
+                text: `In quale regione si trova "${capital}"?`,
                 target: region,
                 attempts: {}
             });
@@ -127,7 +127,7 @@ class GameManager {
             const region = provinces[prov];
             qs.push({
                 level: 3,
-                text: `In quale regione si trova la provincia di **${prov}**?`,
+                text: `In quale regione si trova la provincia di "${prov}"?`,
                 target: region,
                 attempts: {}
             });

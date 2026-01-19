@@ -43,3 +43,71 @@
 .read-the-docs {
   color: #888;
 }
+
+/* Login Component */
+.login-container {
+  text-align: center;
+}
+
+/* GameOver Component */
+.gameover-container {
+  text-align: center;
+  min-width: 400px;
+}
+
+.gameover-leaderboard {
+  margin-top: 2rem;
+  text-align: left;
+}
+
+.gameover-list {
+  list-style: none;
+  padding: 0;
+}
+
+.gameover-list-item {
+  padding: 0.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  justify-content: space-between;
+  color: white;
+}
+
+.gameover-list-item.is-me {
+  color: #3b82f6;
+  font-weight: bold;
+}
+
+.gameover-wait-text {
+  margin-top: 2rem;
+  opacity: 0.7;
+}
+
+/* GameInProgress Component */
+.inprogress-container {
+  text-align: center;
+  min-width: 400px;
+}
+
+.inprogress-leaderboard {
+  margin-top: 2rem;
+  text-align: left;
+}
+
+.inprogress-list {
+  list-style: none;
+  padding: 0;
+}
+
+.inprogress-list-item {
+  padding: 0.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  justify-content: space-between;
+  color: white;
+}
+
+.inprogress-wait-text {
+  margin-top: 2rem;
+  opacity: 0.7;
+}

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Map from './Map';
+import './GameInterface.css';
 
 export default function GameInterface({ socket, gameState, myId }) {
     const { players, currentQuestion } = gameState;
@@ -88,55 +89,30 @@ export default function GameInterface({ socket, gameState, myId }) {
     const totalPlayers = sortedPlayers.length;
 
     return (
-        <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column' }}>
+        <div className="game-interface-container">
             {/* HUD Header */}
-            <div className="glass-panel" style={{
-                padding: '1rem',
-                margin: '1rem',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                zIndex: 10
-            }}>
-                <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                    <div style={{ fontWeight: 'bold', fontSize: '1.2rem' }}>Livello {currentQuestion.level}</div>
+            <div className="glass-panel game-hud">
+                <div className="game-hud-left">
+                    <div className="game-level-indicator">Livello {currentQuestion.level}</div>
                 </div>
 
-                <div style={{ flex: 1, textAlign: 'center' }}>
+                <div className="game-hud-center">
                     Domanda {currentQuestion.index}/{currentQuestion.total}
                 </div>
 
-                <div style={{ fontWeight: 'bold', fontSize: '1.2rem', color: '#f59e0b' }}>
+                <div className="game-hud-right">
                     Punti: {me ? me.score : 0}
                 </div>
             </div>
 
             {/* Map Area */}
-            <div style={{ flex: 1, position: 'relative' }}>
+            <div className="game-map-area">
 
                 {/* Rank Badge */}
-                <div className="glass-panel" style={{
-                    position: 'absolute',
-                    top: '1rem',
-                    right: '1rem',
-                    width: '100px',
-                    height: '100px',
-                    borderRadius: '50%',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    zIndex: 20,
-                    padding: '0rem',
-                    background: 'rgba(59, 130, 246, 0.6)', // Primary color with opacity
-                    border: '2px solid rgba(255, 255, 255, 0.2)',
-                    boxShadow: '0 4px 15px rgba(0,0,0,0.3)',
-                    textAlign: 'center',
-                    lineHeight: '1.2'
-                }}>
-                    <span style={{ fontSize: '0.7rem', opacity: 0.9 }}>Sei il</span>
-                    <span style={{ fontSize: '2rem', fontWeight: 'bold' }}>{myRank}°</span>
-                    <span style={{ fontSize: '0.6rem', opacity: 0.9 }}>in classifica</span>
+                <div className="glass-panel game-rank-badge">
+                    <span className="game-rank-label">Sei il</span>
+                    <span className="game-rank-value">{myRank}°</span>
+                    <span className="game-rank-sublabel">in classifica</span>
                 </div>
 
                 <Map onRegionClick={handleRegionClick} showLabels={showLabels} />
@@ -144,45 +120,16 @@ export default function GameInterface({ socket, gameState, myId }) {
                 {/* Overlay Feedback */}
                 {
                     feedback && (
-                        <div className="gamified-panel" style={{
-                            position: 'absolute',
-                            top: '50%', left: '50%',
-                            // transform is handled by keyframes 'popIn'
-                            background: feedback.type === 'correct' ? 'rgba(22, 163, 74, 0.95)' :
-                                feedback.type === 'wrong' ? 'rgba(220, 38, 38, 0.95)' : 'rgba(245, 158, 11, 0.95)',
-                            padding: '2rem 4rem',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            zIndex: 100,
-                            pointerEvents: 'none',
-                            minWidth: '300px'
-                        }}>
-                            <h2 style={{
-                                fontSize: '3rem',
-                                margin: '0 0 0.5rem 0',
-                                color: 'white',
-                                textTransform: 'uppercase',
-                                textShadow: '0 4px 12px rgba(0,0,0,0.4)',
-                                letterSpacing: '2px',
-                                fontStyle: 'italic'
-                            }}>{feedback.title}</h2>
+                        <div className={`gamified-panel game-feedback-overlay ${feedback.type}`}>
+                            <h2 className="game-feedback-title">{feedback.title}</h2>
 
                             {feedback.scoreStr && (
-                                <div className="score-animation" style={{
-                                    color: '#fbbf24',
-                                    marginBottom: '0.5rem'
-                                }}>
+                                <div className="score-animation game-feedback-score">
                                     {feedback.scoreStr}
                                 </div>
                             )}
 
-                            <div style={{
-                                fontSize: '1.5rem',
-                                color: 'rgba(255,255,255,0.9)',
-                                fontWeight: '600'
-                            }}>
+                            <div className="game-feedback-submsg">
                                 {feedback.subMsg}
                             </div>
                         </div>
@@ -192,22 +139,11 @@ export default function GameInterface({ socket, gameState, myId }) {
                 {/* Level Rules Overlay */}
                 {
                     levelRules && (
-                        <div className="glass-panel fade-in" style={{
-                            position: 'absolute',
-                            top: '0', left: '0',
-                            width: '100%', height: '100%',
-                            background: 'rgba(0, 0, 0, 0.85)',
-                            display: 'flex',
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                            flexDirection: 'column',
-                            zIndex: 200, // Higher than everything
-                            pointerEvents: 'none' // Let clicks pass through if user knows what to do? Maybe better to block slightly or just overlay
-                        }}>
-                            <h1 style={{ fontSize: '3rem', textAlign: 'center', color: '#60a5fa', marginBottom: '1rem' }}>
+                        <div className="glass-panel fade-in game-rules-overlay">
+                            <h1 className="game-rules-title">
                                 Livello {currentQuestion.level}
                             </h1>
-                            <h2 style={{ fontSize: '2rem', textAlign: 'center', color: 'white', maxWidth: '80%' }}>
+                            <h2 className="game-rules-text">
                                 {levelRules}
                             </h2>
                         </div>
@@ -218,20 +154,16 @@ export default function GameInterface({ socket, gameState, myId }) {
             {/* Result Table (if done) */}
             {
                 finalResult && (
-                    <div className="glass-panel fade-in" style={{
-                        margin: '0 1rem 1rem 1rem',
-                        textAlign: 'center',
-                        backgroundColor: finalResult.correct ? 'rgba(20, 83, 45, 0.8)' : 'rgba(127, 29, 29, 0.8)'
-                    }}>
-                        <table style={{ width: '100%', color: 'white' }}>
+                    <div className={`glass-panel fade-in game-result-panel ${finalResult.correct ? 'correct' : 'wrong'}`}>
+                        <table className="game-result-table">
                             <tbody>
                                 <tr>
-                                    <td style={{ padding: '0.5rem', fontWeight: 'bold' }}>Risultato:</td>
-                                    <td style={{ padding: '0.5rem' }}>{finalResult.correct ? 'RISPOSTA ESATTA' : 'RISPOSTA SBAGLIATA'}</td>
+                                    <td className="game-result-cell-label">Risultato:</td>
+                                    <td className="game-result-cell-value">{finalResult.correct ? 'RISPOSTA ESATTA' : 'RISPOSTA SBAGLIATA'}</td>
                                 </tr>
                                 <tr>
-                                    <td style={{ padding: '0.5rem', fontWeight: 'bold' }}>Risposta Corretta:</td>
-                                    <td style={{ padding: '0.5rem', fontSize: '1.2rem', fontWeight: "bold" }}>{finalResult.correctAnswer}</td>
+                                    <td className="game-result-cell-label">Risposta Corretta:</td>
+                                    <td className="game-result-answer">{finalResult.correctAnswer}</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -242,39 +174,11 @@ export default function GameInterface({ socket, gameState, myId }) {
             {/* Question Footer */}
             {
                 !finalResult && (
-                    <div className="glass-panel" style={{
-                        margin: '1rem',
-                        textAlign: 'center',
-                        background: 'linear-gradient(to right, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.9))',
-                        zIndex: 10
-                    }}>
-                        <h2 style={{ margin: 0 }} dangerouslySetInnerHTML={{ __html: currentQuestion.text }}></h2>
+                    <div className="glass-panel game-footer">
+                        <h2 className="game-footer-text-container" dangerouslySetInnerHTML={{ __html: currentQuestion.text }}></h2>
                     </div>
                 )
             }
-
-            {/* Leaderboard Sidebar (Optional, maybe small overlay) */}
-            {/*
-            <div style={{
-                position: 'absolute',
-                right: '1rem',
-                top: '50%',
-                transform: 'translateY(-50%)',
-                width: '150px',
-                fontSize: '0.8rem',
-                opacity: 0.7
-            }} className="glass-panel">
-                <h4 style={{ margin: '0 0 0.5rem 0' }}>Classifica</h4>
-                {Object.values(gameState.players)
-                    .sort((a, b) => b.score - a.score)
-                    .map(p => (
-                        <div key={p.id} style={{ display: 'flex', justifyContent: 'space-between' }}>
-                            <span>{p.name}</span>
-                            <span>{p.score}</span>
-                        </div>
-                    ))}
-            </div>
-            */}
         </div >
     );
 }

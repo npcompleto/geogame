@@ -1,0 +1,64 @@
+.lobby-container {
+    width: 80%;
+    max-width: 800px;
+    margin: auto;
+}
+
+.lobby-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.lobby-timer-badge {
+    padding: 0.5rem 1rem;
+    background: var(--primary);
+    font-weight: bold;
+}
+
+.lobby-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.lobby-player-card {
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    border: 1px solid var(--glass-border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.lobby-player-card.ready {
+    border: 2px solid #22c55e;
+}
+
+.lobby-check-icon {
+    color: #22c55e;
+}
+
+.lobby-actions {
+    display: flex;
+    justify-content: center;
+}
+
+.lobby-ready-btn {
+    font-size: 1.2rem;
+}
+
+.lobby-waiting-text {
+    opacity: 0.8;
+    font-style: italic;
+}
+
+.lobby-footer {
+    margin-top: 2rem;
+    text-align: center;
+    font-size: 0.9rem;
+    opacity: 0.6;
+}
