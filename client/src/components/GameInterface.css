@@ -126,8 +126,9 @@
 .game-rules-overlay {
     position: absolute;
     top: 0;
-    left: 0;
-    width: 100%;
+    left: 50%;
+    transform: translate(-50%, 0);
+    width: 80%;
     height: 100%;
     background: rgba(0, 0, 0, 0.85);
     display: flex;

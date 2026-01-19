@@ -12,7 +12,7 @@ const Map = ({ onRegionClick, showLabels }) => {
             <ComposableMap
                 projection="geoMercator"
                 projectionConfig={{
-                    scale: 3500,
+                    scale: 2500,
                     center: [12.5, 42] // Center roughly on Italy
                 }}
                 className="map-composable"
